@@ -18,5 +18,55 @@
     </form>
   </div>
 </section>
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
 
+  const marca_field= document.getElementById('id_marca')
+  const modelo_field = document.getElementById('id_modelo')
+  const modelo_padre = document.getElementById('modelo_padre')
+
+  marca_field.addEventListener('change', getDemartamentoId)
+
+  function getDemartamentoId(e){
+    const marca_id = e.target.value
+    const options = []
+    const data = { id: marca_id}
+
+    fetch("{% url 'get_modelos' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => response.json())
+      .then(data => {
+        modelo_field.innerHTML = ``
+        for(let i=0; data.length; i++){
+          const option = document.createElement('option')
+          option.value = data[i]['id']
+          option.innerHTML = data[i]['descripcion']
+          // modelo_field.innerHTML += `<option value='${data[i]['codigo']}' selected=''>${data[i]['name']}</option>`
+          modelo_field.appendChild(option)
+        }
+      })
+      //departamento_field.append(options)
+  }
+</script>
 {% endblock %}
